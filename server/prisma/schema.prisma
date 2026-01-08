@@ -1,0 +1,28 @@
+// This tells Prisma to use SQLite
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// This generates the TypeScript types automatically
+generator client {
+  provider = "prisma-client-js"
+}
+
+// OUR DATA MODEL
+model Reminder {
+  // We use UUID (random string) instead of ID 1, 2, 3...
+  // Why? It's safer and better for distributed systems.
+  id         String   @id @default(uuid())
+  
+  content    String
+  phone      String
+  targetDate DateTime
+  
+  // Flags to track status
+  isSent     Boolean  @default(false)
+  
+  // Auditing (Good practice to always have these)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
