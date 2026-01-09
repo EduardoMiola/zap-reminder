@@ -1,28 +1,54 @@
-// This tells Prisma to use SQLite
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql" 
   url      = env("DATABASE_URL")
 }
 
-// This generates the TypeScript types automatically
 generator client {
   provider = "prisma-client-js"
 }
 
-// OUR DATA MODEL
-model Reminder {
-  // We use UUID (random string) instead of ID 1, 2, 3...
-  // Why? It's safer and better for distributed systems.
-  id         String   @id @default(uuid())
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String   
   
+  reminders     Reminder[]
+  whatsapps     Whatsapp[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Whatsapp {
+  id        String   @id @default(uuid())
+  name      String   
+  status    String   @default("DISCONNECTED") 
+  qrcode    String?  
+  retries   Int      @default(0)
+  isDefault Boolean  @default(false)
+  
+  // Relacionamento com User
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Reminder {
+  id         String   @id @default(uuid())
   content    String
   phone      String
   targetDate DateTime
-  
-  // Flags to track status
   isSent     Boolean  @default(false)
   
-  // Auditing (Good practice to always have these)
+  // Relacionamento com User
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  
+  whatsappId String?
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
