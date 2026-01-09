@@ -1,58 +1,53 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Paleta Definida */
+  --color-strawberry: #E63946;
+  --color-honeydew: #F1FAEE;
+  --color-frosted: #A8DADC;
+  --color-steel: #457B9D;
+  --color-deep-space: #1D3557;
+
+  /* Aplicações Funcionais */
+  --bg-primary: var(--color-honeydew);
+  --bg-card: #FFFFFF;
+  --text-primary: var(--color-deep-space);
+  --text-secondary: #4a5568;
+  --primary-btn: var(--color-steel);
+  --primary-btn-hover: var(--color-deep-space);
+  --danger: var(--color-strawberry);
+  --border: var(--color-frosted);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
-  justify-content: center;
-}
-
-.container {
-  background: #1a1a1a;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-h1 { margin: 0; font-size: 1.8rem; text-align: center; }
-
-.input-group { display: flex; flex-direction: column; gap: 0.5rem; }
-
-label { font-size: 0.9rem; color: #aaa; }
-
-input {
-  padding: 0.8rem;
-  border-radius: 4px;
-  border: 1px solid #444;
-  background: #333;
-  color: white;
-  font-size: 1rem;
 }
 
 button {
-  background-color: #646cff;
-  color: white;
-  padding: 0.8rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
   cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
-button:hover { background-color: #535bf2; }
+input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--color-steel);
+  box-shadow: 0 0 0 2px rgba(69, 123, 157, 0.2);
+}

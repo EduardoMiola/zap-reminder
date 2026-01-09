@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { ReminderRepository } from "../repositories/ReminderRepo"; 
 import { CreateReminderService } from "../services/ReminderServices/CreateReminderService";
+import { ListRemindersService } from "../services/ReminderServices/ListRemindersService";
 
 export class ReminderController {
   async store(request: FastifyRequest, reply: FastifyReply) {
@@ -27,9 +28,20 @@ export class ReminderController {
       content,
       phone,
       date,
-      userId, 
+      userId,
     });
 
     return reply.status(201).send(reminder);
+  }
+
+  async index(request: FastifyRequest, reply: FastifyReply) {
+    const userId = request.user.sub; // Pega o ID do token
+
+    const reminderRepository = new ReminderRepository();
+    const listRemindersService = new ListRemindersService(reminderRepository);
+
+    const reminders = await listRemindersService.execute(userId);
+
+    return reply.status(200).send(reminders);
   }
 }

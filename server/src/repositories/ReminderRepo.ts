@@ -16,13 +16,12 @@ export class ReminderRepository {
         phone: data.phone,
         targetDate: data.targetDate,
         isSent: data.isSent,
-        user: { connect: { id: data.userId } }, 
+        user: { connect: { id: data.userId } },
       },
     });
     return reminder;
   }
 
-  // Busca todos os pendentes (método que o Scheduler usa)
   async findAllPending() {
     return await prisma.reminder.findMany({
       where: {
@@ -32,11 +31,17 @@ export class ReminderRepository {
     });
   }
 
-  // O MÉTODO QUE ESTAVA FALTANDO:
   async markAsSent(id: string) {
     return await prisma.reminder.update({
       where: { id },
       data: { isSent: true },
+    });
+  }
+
+  async findAllByUserId(userId: string) {
+    return await prisma.reminder.findMany({
+      where: { userId },
+      orderBy: { targetDate: "asc" },
     });
   }
 }

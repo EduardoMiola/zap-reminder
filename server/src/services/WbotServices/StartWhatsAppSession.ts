@@ -44,23 +44,32 @@ export const StartWhatsAppSession = async (whatsappId: string) => {
   wsocket.ev.on(
     "connection.update",
     async ({ connection, lastDisconnect, qr }) => {
-      // 3. SE TIVER QR CODE, DESENHA NO TERMINAL
+      // 1. SE TIVER QR CODE, SALVA NO BANCO IMEDIATAMENTE
       if (qr) {
-        console.log("\n👇 ESCANEIE O QR CODE ABAIXO 👇");
-        qrcode.generate(qr, { small: true });
+        console.log("📡 QR Code gerado! Atualizando banco...");
 
         await prisma.whatsapp.update({
           where: { id: whatsappId },
-          data: { status: "QRCODE", qrcode: qr },
+          data: {
+            status: "QRCODE", // Define o status específico
+            qrcode: qr, // Salva a string longa do QR
+          },
         });
       }
 
+      // 2. SE CONECTOU, LIMPA O QR CODE
       if (connection === "open") {
-        console.log("✅ WhatsApp Conectado!");
+        console.log("✅ Conexão estabelecida!");
+
         await prisma.whatsapp.update({
           where: { id: whatsappId },
-          data: { status: "CONNECTED", qrcode: "" },
+          data: {
+            status: "CONNECTED",
+            qrcode: null, // Limpa para não aparecer mais
+            retries: 0,
+          },
         });
+
         initWbot(whatsappId, wsocket as any);
       }
 
