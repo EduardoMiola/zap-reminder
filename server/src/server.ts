@@ -1,65 +1,37 @@
-import fastify from "fastify";
-import cors from "@fastify/cors";
-import { PrismaClient } from "@prisma/client";
-import { z } from "zod";
+import { app } from "./app";
+import { prisma } from "./libs/prisma";
+import { StartWhatsAppSession } from "./services/WbotServices/StartWhatsAppSession";
+import { CheckPendingRemindersService } from "./services/ReminderServices/CheckPendingRemindersService";
 
-// Import our new services
-import { connectToWhatsApp } from "./services/whatsapp.js";
-import { startScheduler } from "./services/scheduler.js";
-
-const prisma = new PrismaClient();
-const app = fastify();
-
-app.register(cors, { origin: "*" });
-
-app.get("/", () => {
-  return { message: "Server ta funcionando!" };
-});
-
-app
-  .listen({ port: 3333 })
-  .then(() => {
-    console.log("Server rodando na porta 3333");
-  })
-  .catch((err) => {
-    console.error("Erro ao iniciar o servidor:", err);
-    process.exit(1);
-  });
-
-app.post("/reminders", async (request) => {
-  const bodySchema = z.object({
-    content: z.string(),
-    phone: z.string(),
-    date: z.string().datetime(),
-  });
-
-  const { content, phone, date } = bodySchema.parse(request.body);
-
-  const reminder = await prisma.reminder.create({
-    data: {
-      content,
-      phone,
-      targetDate: new Date(date),
-    },
-  });
-
-  return reminder;
-});
-
-// STARTUP LOGIC
 const start = async () => {
   try {
-    // 1. Start HTTP Server
+    // 1. Inicia o Servidor HTTP
     await app.listen({ port: 3333 });
-    console.log("HTTP Server running on http://localhost:3333");
+    console.log("🚀 Server running on http://localhost:3333");
 
-    // 2. Connect to WhatsApp
-    await connectToWhatsApp();
+    // 2. Lógica de Inicialização do WhatsApp (Multi-usuário)
+    console.log("🔌 Buscando conexões existentes...");
 
-    // 3. Start the Cron Job/Scheduler
-    startScheduler();
+    // Busca TODOS os whatsapps que deveriam estar conectados
+    // (Não criamos mais nada automático aqui, pois falta o userId)
+    const whatsapps = await prisma.whatsapp.findMany({
+      where: { status: { not: "DISCONNECTED" } }, // Opcional: só tenta reconectar os que não estavam deslogados
+    });
+
+    if (whatsapps.length > 0) {
+      console.log(`🔌 Encontradas ${whatsapps.length} conexões para iniciar.`);
+      for (const wpp of whatsapps) {
+        StartWhatsAppSession(wpp.id);
+      }
+    } else {
+      console.log("⚠️ Nenhuma conexão WhatsApp ativa encontrada no banco.");
+    }
+
+    // 3. Inicia o Scheduler
+    console.log("⏰ Scheduler service started.");
+    setInterval(CheckPendingRemindersService, 60000);
   } catch (err) {
-    app.log.error(err);
+    console.error("❌ Fatal Error during startup:", err);
     process.exit(1);
   }
 };
